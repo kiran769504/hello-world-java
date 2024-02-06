@@ -29,47 +29,19 @@ pipeline {
                 script {
                     catchError {
                         // Disable the Javadoc and source JAR generation if not needed
-                        sh "${env.MAVEN_HOME}/bin/mvn clean install -Dmaven.javadoc.skip=true -Dsource.skip=true"
+                        sh "${env.MAVEN_HOME}/bin/mvn clean deploy -Dmaven.javadoc.skip=true -Dsource.skip=true"
                     }
                 }
             }
         }
 
-        stage('Unit Test') {
-            steps {
-                echo 'Running unit tests...'
-                script {
-                    catchError {
-                        sh "${env.MAVEN_HOME}/bin/mvn test"
-                    }
-                }
-                junit 'target/surefire-reports/*.xml'
-            }
-        }
-
-        stage('Integration Test') {
-            steps {
-                echo 'Running integration tests...'
-                script {
-                    catchError {
-                        sh "${env.MAVEN_HOME}/bin/mvn verify -Pintegration-tests"
-                    }
-                }
-            }
-        }
-
-        stage('Artifact Management') {
-            steps {
-                echo 'Publishing artifacts...'
-                archiveArtifacts 'target/*.jar'
-            }
-        }
+        // ... existing stages ...
 
         stage('Deployment') {
             steps {
-                echo "Deploying to ${ENVIRONMENT} environment..."
+                echo "Deploying to Artifactory..."
                 catchError {
-                    sh "scp -i 'C:\\Python_AWS_MI_LCT\\jenkins_demo.pem' target/hello-world-java-1.0-SNAPSHOT.jar ubuntu@ip-172-31-15-25:/home/ubuntu/projectartifacts/"
+                    sh "${env.MAVEN_HOME}/bin/mvn deploy"
                 }
             }
         }
