@@ -2,7 +2,7 @@ pipeline {
     agent any
 
     parameters {
-        string(name: 'ENVIRONMENT', defaultValue: 'production', description: 'Target deployment environment')
+        string(name: 'ENVIRONMENT', defaultValue: 'UAT', description: 'Target deployment environment')
     }
 
     stages {
@@ -16,11 +16,11 @@ pipeline {
         stage('Build') {
             steps {
                 echo 'Building the project...'
-                try {
-                    sh 'mvn clean install'
-                } catch (Exception e) {
-                    currentBuild.result = 'FAILURE'
-                    error("Build failed: ${e.message}")
+                script {
+                    // Using catchError instead of try/catch
+                    catchError {
+                        sh 'mvn clean install'
+                    }
                 }
             }
         }
@@ -28,11 +28,10 @@ pipeline {
         stage('Unit Test') {
             steps {
                 echo 'Running unit tests...'
-                try {
-                    sh 'mvn test'
-                } catch (Exception e) {
-                    currentBuild.result = 'FAILURE'
-                    error("Unit tests failed: ${e.message}")
+                script {
+                    catchError {
+                        sh 'mvn test'
+                    }
                 }
             }
         }
@@ -40,17 +39,9 @@ pipeline {
         stage('Integration Test') {
             steps {
                 echo 'Running integration tests...'
-                // Only run integration tests if the profile is defined in the pom.xml
                 script {
-                    if (fileExists('pom.xml') && sh(script: 'grep -q "<id>integration-tests</id>" pom.xml', returnStatus: true) == 0) {
-                        try {
-                            sh 'mvn verify -Pintegration-tests'
-                        } catch (Exception e) {
-                            currentBuild.result = 'FAILURE'
-                            error("Integration tests failed: ${e.message}")
-                        }
-                    } else {
-                        echo 'Integration tests skipped as the profile is not defined.'
+                    catchError {
+                        sh 'mvn verify -Pintegration-tests'
                     }
                 }
             }
@@ -66,7 +57,9 @@ pipeline {
         stage('Deployment') {
             steps {
                 echo "Deploying to ${ENVIRONMENT} environment..."
-                sh "scp target/*.jar user@server:/path/to/deployment"
+                catchError {
+                    sh "scp target/*.jar user@server:/path/to/deployment"
+                }
             }
         }
     }
