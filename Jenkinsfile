@@ -8,8 +8,8 @@ pipeline {
     stages {
         stage('Checkout') {
             steps {
-                echo 'Checking out code...'
-                checkout scm
+                echo 'Checking out code manually...'
+                git url: 'https://github.com/kiran769504/hello-world-java.git', branch: 'master'
             }
         }
 
