@@ -6,6 +6,8 @@ pipeline {
     }
 
     environment {
+        MAVEN_HOME = tool name: 'Maven', type: 'maven'
+        PATH = "${env.MAVEN_HOME}/bin:${env.PATH}"
         MAVEN_OPTS = '-Xmx2g -XX:MaxPermSize=512m -XX:+UseParallelGC'
     }
 
@@ -27,7 +29,7 @@ pipeline {
                 script {
                     catchError {
                         // Disable the Javadoc and source JAR generation if not needed
-                        sh 'mvn clean install -Dmaven.javadoc.skip=true -Dsource.skip=true'
+                        sh "${env.MAVEN_HOME}/bin/mvn clean install -Dmaven.javadoc.skip=true -Dsource.skip=true"
                     }
                 }
             }
@@ -38,7 +40,7 @@ pipeline {
                 echo 'Running unit tests...'
                 script {
                     catchError {
-                        sh 'mvn test'
+                        sh "${env.MAVEN_HOME}/bin/mvn test"
                     }
                 }
                 junit 'target/surefire-reports/*.xml'
@@ -50,7 +52,7 @@ pipeline {
                 echo 'Running integration tests...'
                 script {
                     catchError {
-                        sh 'mvn verify -Pintegration-tests'
+                        sh "${env.MAVEN_HOME}/bin/mvn verify -Pintegration-tests"
                     }
                 }
             }
@@ -67,7 +69,7 @@ pipeline {
             steps {
                 echo "Deploying to ${ENVIRONMENT} environment..."
                 catchError {
-                    sh "scp -i C:\\Python_AWS_MI_LCT\\jenkins_demo.pem target/hello-world-java-1.0-SNAPSHOT.jar ubuntu@ip-172-31-9-24:/home/ubuntu/projectartifacts/"
+                    sh "scp -i C:\\Python_AWS_MI_LCT\\jenkins_demo.pem target/hello-world-java-1.0-SNAPSHOT.jar ubuntu@ip-18.117.92.97:/home/ubuntu/projectartifacts/"
                 }
             }
         }
