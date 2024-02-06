@@ -5,11 +5,19 @@ pipeline {
         string(name: 'ENVIRONMENT', defaultValue: 'UAT', description: 'Target deployment environment')
     }
 
+    environment {
+        MAVEN_OPTS = '-Xmx2g -XX:MaxPermSize=512m -XX:+UseParallelGC'
+    }
+
+    options {
+        skipDefaultCheckout()  // Skip the default checkout to perform a more controlled one
+    }
+
     stages {
         stage('Checkout') {
             steps {
                 echo 'Checking out code manually...'
-                git url: 'https://github.com/kiran769504/hello-world-java.git', branch: 'master'
+                checkout scm  // Use the default checkout for more control
             }
         }
 
@@ -18,7 +26,8 @@ pipeline {
                 echo 'Building the project...'
                 script {
                     catchError {
-                        sh 'mvn clean install'
+                        // Disable the Javadoc and source JAR generation if not needed
+                        sh 'mvn clean install -Dmaven.javadoc.skip=true -Dsource.skip=true'
                     }
                 }
             }
@@ -32,7 +41,7 @@ pipeline {
                         sh 'mvn test'
                     }
                 }
-                junit 'target/surefire-reports/*.xml'  // Include this line to publish JUnit test results
+                junit 'target/surefire-reports/*.xml'
             }
         }
 
