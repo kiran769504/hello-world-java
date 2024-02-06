@@ -9,4 +9,12 @@
         <maven.compiler.source>1.8</maven.compiler.source>
         <maven.compiler.target>1.8</maven.compiler.target>
     </properties>
+
+    <!-- Add the integration-tests profile if needed -->
+    <profiles>
+        <profile>
+            <id>integration-tests</id>
+            <!-- Define integration test configurations here -->
+        </profile>
+    </profiles>
 </project>
