@@ -69,7 +69,6 @@ pipeline {
             steps {
                 echo "Deploying to ${ENVIRONMENT} environment..."
                 catchError {
-                    // Updated scp command to copy artifact to ip-172-31-9-24
                     sh "scp target/hello-world-java-1.0-SNAPSHOT.jar ubuntu@ip-172-31-9-24:/home/ubuntu/projectartifacts/"
                 }
             }
