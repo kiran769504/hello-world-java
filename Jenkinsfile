@@ -1,65 +1,77 @@
 pipeline {
     agent any
-    
+
+    parameters {
+        string(name: 'ENVIRONMENT', defaultValue: 'production', description: 'Target deployment environment')
+    }
+
     stages {
-        stage('Build') {
+        stage('Checkout') {
             steps {
-                script {
-                    // Maven build step
-                    sh 'mvn clean package'
-                }
+                echo 'Checking out code...'
+                checkout scm
             }
         }
-        
+
         stage('Unit Test') {
             steps {
                 script {
-                    // Maven unit test step
-                    sh 'mvn test'
+                    echo 'Running unit tests...'
+                    try {
+                        sh 'mvn clean test'
+                    } catch (Exception e) {
+                        currentBuild.result = 'FAILURE'
+                        error("Unit tests failed: ${e.message}")
+                    }
                 }
             }
         }
-        
-        stage('Integration Test (Optional)') {
+
+        stage('Integration Test') {
             when {
-                expression { env.RUN_INTEGRATION_TESTS == 'true' }
+                expression { params.RUN_INTEGRATION_TESTS == 'true' }
             }
             steps {
                 script {
-                    // Execute integration tests if applicable
-                    // Add your integration test commands here
+                    echo 'Running integration tests...'
+                    try {
+                        sh 'mvn verify -Pintegration-tests'
+                    } catch (Exception e) {
+                        currentBuild.result = 'FAILURE'
+                        error("Integration tests failed: ${e.message}")
+                    }
                 }
             }
         }
-        
+
         stage('Artifact Management') {
             steps {
                 script {
-                    // Publish JAR file as a Jenkins artifact or to a binary repository manager
-                    archiveArtifacts artifacts: 'target/*.jar', fingerprint: true
+                    echo 'Publishing artifacts...'
+                    // Adjust the path and file extension based on your project
+                    archiveArtifacts 'target/*.jar'
                 }
             }
         }
-        
+
         stage('Deployment') {
-            when {
-                expression { env.DEPLOY == 'true' }
-            }
             steps {
                 script {
+                    echo "Deploying to ${ENVIRONMENT} environment..."
                     // Implement your deployment strategy (e.g., copy JAR file to a server)
-                    // Add deployment commands here
+                    // Adjust the path and file name based on your project
+                    sh "scp target/*.jar user@server:/path/to/deployment"
                 }
             }
         }
     }
-    
+
     post {
+        success {
+            echo 'Pipeline completed successfully!'
+        }
         failure {
-            script {
-                // Additional actions to take if the pipeline fails
-                echo 'Pipeline failed! Take necessary actions.'
-            }
+            echo 'Pipeline failed!'
         }
     }
 }
