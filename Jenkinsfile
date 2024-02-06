@@ -17,7 +17,6 @@ pipeline {
             steps {
                 echo 'Building the project...'
                 script {
-                    // Using catchError instead of try/catch
                     catchError {
                         sh 'mvn clean install'
                     }
@@ -33,6 +32,7 @@ pipeline {
                         sh 'mvn test'
                     }
                 }
+                junit 'target/surefire-reports/*.xml'  // Include this line to publish JUnit test results
             }
         }
 
@@ -58,7 +58,6 @@ pipeline {
             steps {
                 echo "Deploying to ${ENVIRONMENT} environment..."
                 catchError {
-                    // Use the correct path on the server for deployment
                     sh "scp target/hello-world-java-1.0-SNAPSHOT.jar ubuntu@ip-172-31-9-24:/home/ubuntu/projectartifacts/"
                 }
             }
