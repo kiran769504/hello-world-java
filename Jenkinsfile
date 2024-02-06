@@ -69,8 +69,7 @@ pipeline {
             steps {
                 echo "Deploying to ${ENVIRONMENT} environment..."
                 catchError {
-                    sh 'scp -o StrictHostKeyChecking=no -i /home/ubuntu/jenkins_demo.pem target/hello-world-java-1.0-SNAPSHOT.jar ubuntu@ip-172-31-9-24:/home/ubuntu/projectartifacts/'
-
+                    sh "cp /var/lib/jenkins/workspace/javapipelinedemoproject/target/hello-world-java-1.0-SNAPSHOT.jar /home/ubuntu/projectartifacts/"
                 }
             }
         }
