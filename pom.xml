@@ -2,7 +2,7 @@
          xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
          xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
     <modelVersion>4.0.0</modelVersion>
-
+    
     <groupId>com.example</groupId>
     <artifactId>hello-world-java</artifactId>
     <version>1.0-SNAPSHOT</version>
@@ -11,17 +11,6 @@
         <maven.compiler.source>1.8</maven.compiler.source>
         <maven.compiler.target>1.8</maven.compiler.target>
     </properties>
-
-    <distributionManagement>
-        <repository>
-            <id>artifactory-releases</id>
-            <url>http://18.117.92.97:8082/artifactory/libs-release-local</url>
-        </repository>
-        <snapshotRepository>
-            <id>artifactory-snapshots</id>
-            <url>http://18.117.92.97:8082/artifactory/libs-snapshot-local</url>
-        </snapshotRepository>
-    </distributionManagement>
 
     <dependencies>
         <!-- Add JUnit as a test-scoped dependency -->
