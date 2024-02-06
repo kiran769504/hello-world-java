@@ -69,7 +69,8 @@ pipeline {
             steps {
                 echo "Deploying to ${ENVIRONMENT} environment..."
                 catchError {
-                    sh "scp -i 'C:\\Python_AWS_MI_LCT\\jenkins_demo.pem' target/hello-world-java-1.0-SNAPSHOT.jar ubuntu@ip-172-31-15-25:/home/ubuntu/projectartifacts/"
+                    // Updated scp command to copy artifact to ip-172-31-9-24
+                    sh "scp -i 'C:\\Python_AWS_MI_LCT\\jenkins_demo.pem' target/hello-world-java-1.0-SNAPSHOT.jar ubuntu@ip-172-31-9-24:/home/ubuntu/projectartifacts/"
                 }
             }
         }
