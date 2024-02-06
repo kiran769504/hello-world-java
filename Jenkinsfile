@@ -9,7 +9,6 @@ pipeline {
         MAVEN_HOME = tool name: 'Maven', type: 'maven'
         PATH = "${env.MAVEN_HOME}/bin:${env.PATH}"
         MAVEN_OPTS = '-Xmx2g -XX:MaxPermSize=512m -XX:+UseParallelGC'
-        ARTIFACTORY_CREDS = credentials('artifactory-credentials')  // Assuming you've set up Jenkins credentials with ID 'artifactory-credentials'
     }
 
     options {
@@ -70,10 +69,7 @@ pipeline {
             steps {
                 echo "Deploying to ${ENVIRONMENT} environment..."
                 catchError {
-                    // Deploy to Artifactory using Maven deploy goal
-                    withCredentials([usernamePassword(credentialsId: 'artifactory-username', passwordVariable: 'ARTIFACTORY_PASSWORD', usernameVariable: 'ARTIFACTORY_USERNAME')]) {
-                        sh "${env.MAVEN_HOME}/bin/mvn deploy -DaltDeploymentRepository=artifactory-releases::default::http://18.117.92.97:8082/artifactory/libs-release-local -DaltSnapshotDeploymentRepository=artifactory-snapshots::default::http://18.117.92.97:8082/artifactory/libs-snapshot-local"
-                    }
+                    sh "scp -i 'C:\\Python_AWS_MI_LCT\\jenkins_demo.pem' target/hello-world-java-1.0-SNAPSHOT.jar ubuntu@ip-172-31-15-25:/home/ubuntu/projectartifacts/"
                 }
             }
         }
