@@ -1,63 +1,65 @@
 pipeline {
     agent any
-
+    
     stages {
-        stage('Checkout') {
-            steps {
-                checkout scm
-            }
-        }
-
         stage('Build') {
             steps {
                 script {
-                    echo 'Building the Java application...'
-                    // Your Maven build command
-                    sh 'mvn clean install'
+                    // Maven build step
+                    sh 'mvn clean package'
                 }
             }
         }
-
+        
         stage('Unit Test') {
             steps {
                 script {
-                    echo 'Running unit tests...'
-                    // Your Maven unit test command
-                    // The pipeline will fail if any unit tests fail
+                    // Maven unit test step
                     sh 'mvn test'
                 }
             }
         }
-
+        
         stage('Integration Test (Optional)') {
             when {
-                expression { params.RUN_INTEGRATION_TESTS == 'true' }
+                expression { env.RUN_INTEGRATION_TESTS == 'true' }
             }
             steps {
                 script {
-                    echo 'Running integration tests...'
-                    // Your Maven integration test command
+                    // Execute integration tests if applicable
+                    // Add your integration test commands here
                 }
             }
         }
-
-        stage('Deploy') {
+        
+        stage('Artifact Management') {
             steps {
                 script {
-                    echo 'Deploying the Java application...'
-                    // Your deployment command
-                    // You may copy the JAR to a server or deploy to a container
+                    // Publish JAR file as a Jenkins artifact or to a binary repository manager
+                    archiveArtifacts artifacts: 'target/*.jar', fingerprint: true
+                }
+            }
+        }
+        
+        stage('Deployment') {
+            when {
+                expression { env.DEPLOY == 'true' }
+            }
+            steps {
+                script {
+                    // Implement your deployment strategy (e.g., copy JAR file to a server)
+                    // Add deployment commands here
                 }
             }
         }
     }
-
+    
     post {
-        success {
-            echo 'Build successful! Additional post-build actions can be added here.'
-        }
         failure {
-            echo 'Build failed! Additional actions for failure can be added here.'
+            script {
+                // Additional actions to take if the pipeline fails
+                echo 'Pipeline failed! Take necessary actions.'
+            }
         }
     }
 }
