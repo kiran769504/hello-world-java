@@ -15,41 +15,42 @@ pipeline {
 
         stage('Build') {
             steps {
-                script {
-                    echo 'Building the project...'
-                    try {
-                        sh 'mvn clean install'
-                    } catch (Exception e) {
-                        currentBuild.result = 'FAILURE'
-                        error("Build failed: ${e.message}")
-                    }
+                echo 'Building the project...'
+                try {
+                    sh 'mvn clean install'
+                } catch (Exception e) {
+                    currentBuild.result = 'FAILURE'
+                    error("Build failed: ${e.message}")
                 }
             }
         }
 
         stage('Unit Test') {
             steps {
-                script {
-                    echo 'Running unit tests...'
-                    try {
-                        sh 'mvn test'
-                    } catch (Exception e) {
-                        currentBuild.result = 'FAILURE'
-                        error("Unit tests failed: ${e.message}")
-                    }
+                echo 'Running unit tests...'
+                try {
+                    sh 'mvn test'
+                } catch (Exception e) {
+                    currentBuild.result = 'FAILURE'
+                    error("Unit tests failed: ${e.message}")
                 }
             }
         }
 
         stage('Integration Test') {
             steps {
+                echo 'Running integration tests...'
+                // Only run integration tests if the profile is defined in the pom.xml
                 script {
-                    echo 'Running integration tests...'
-                    try {
-                        sh 'mvn verify -Pintegration-tests'
-                    } catch (Exception e) {
-                        currentBuild.result = 'FAILURE'
-                        error("Integration tests failed: ${e.message}")
+                    if (fileExists('pom.xml') && sh(script: 'grep -q "<id>integration-tests</id>" pom.xml', returnStatus: true) == 0) {
+                        try {
+                            sh 'mvn verify -Pintegration-tests'
+                        } catch (Exception e) {
+                            currentBuild.result = 'FAILURE'
+                            error("Integration tests failed: ${e.message}")
+                        }
+                    } else {
+                        echo 'Integration tests skipped as the profile is not defined.'
                     }
                 }
             }
@@ -57,19 +58,15 @@ pipeline {
 
         stage('Artifact Management') {
             steps {
-                script {
-                    echo 'Publishing artifacts...'
-                    archiveArtifacts 'target/*.jar'
-                }
+                echo 'Publishing artifacts...'
+                archiveArtifacts 'target/*.jar'
             }
         }
 
         stage('Deployment') {
             steps {
-                script {
-                    echo "Deploying to ${ENVIRONMENT} environment..."
-                    sh "scp target/*.jar user@server:/path/to/deployment"
-                }
+                echo "Deploying to ${ENVIRONMENT} environment..."
+                sh "scp target/*.jar user@server:/path/to/deployment"
             }
         }
     }
