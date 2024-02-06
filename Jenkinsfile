@@ -58,6 +58,7 @@ pipeline {
             steps {
                 echo "Deploying to ${ENVIRONMENT} environment..."
                 catchError {
+                    // Use the correct path on the server for deployment
                     sh "scp target/hello-world-java-1.0-SNAPSHOT.jar ubuntu@ip-172-31-9-24:/home/ubuntu/projectartifacts/"
                 }
             }
