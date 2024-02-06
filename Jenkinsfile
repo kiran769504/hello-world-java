@@ -13,12 +13,26 @@ pipeline {
             }
         }
 
+        stage('Build') {
+            steps {
+                script {
+                    echo 'Building the project...'
+                    try {
+                        sh 'mvn clean install'
+                    } catch (Exception e) {
+                        currentBuild.result = 'FAILURE'
+                        error("Build failed: ${e.message}")
+                    }
+                }
+            }
+        }
+
         stage('Unit Test') {
             steps {
                 script {
                     echo 'Running unit tests...'
                     try {
-                        sh 'mvn clean test'
+                        sh 'mvn test'
                     } catch (Exception e) {
                         currentBuild.result = 'FAILURE'
                         error("Unit tests failed: ${e.message}")
@@ -28,9 +42,6 @@ pipeline {
         }
 
         stage('Integration Test') {
-            when {
-                expression { params.RUN_INTEGRATION_TESTS == 'true' }
-            }
             steps {
                 script {
                     echo 'Running integration tests...'
@@ -48,7 +59,6 @@ pipeline {
             steps {
                 script {
                     echo 'Publishing artifacts...'
-                    // Adjust the path and file extension based on your project
                     archiveArtifacts 'target/*.jar'
                 }
             }
@@ -58,8 +68,6 @@ pipeline {
             steps {
                 script {
                     echo "Deploying to ${ENVIRONMENT} environment..."
-                    // Implement your deployment strategy (e.g., copy JAR file to a server)
-                    // Adjust the path and file name based on your project
                     sh "scp target/*.jar user@server:/path/to/deployment"
                 }
             }
